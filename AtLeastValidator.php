@@ -4,6 +4,7 @@ namespace codeonyii\yii2validators;
 
 use Yii;
 use yii\base\InvalidConfigException;
+use yii\helpers\VarDumper;
 use yii\i18n\PhpMessageSource;
 use yii\validators\Validator;
 
@@ -50,6 +51,9 @@ use yii\validators\Validator;
  */
 class AtLeastValidator extends Validator
 {
+    const DIRECTION_ATLEAST = 'atleast';
+    const DIRECTION_ATMOST = 'atmost';
+
     /**
      * @var integer the minimun required quantity of attributes that must to be filled.
      * Defaults to 1.
@@ -71,7 +75,10 @@ class AtLeastValidator extends Validator
      */
     public $skipOnError = false;
 
-    public $direction = '<';
+    /**
+     * @var string
+     */
+    public $direction = self::DIRECTION_ATLEAST;
 
     /**
      * @inheritdoc
@@ -92,7 +99,10 @@ class AtLeastValidator extends Validator
 			];
 		}
         if ($this->message === null) {
-            $this->message = Yii::t('messages', 'You must fill at least {min} of the attributes {attributes}.');
+            $this->message = Yii::t('messages', 'You must fill {direction} {min} of the attributes {attributes}.', [
+                'direction' => $this->direction === self::DIRECTION_ATLEAST ?
+                    Yii::t('messages', 'at least') : Yii::t('messages', 'at most'),
+            ]);
         }
     }
 
@@ -110,7 +120,7 @@ class AtLeastValidator extends Validator
             $chosen += !empty($value) ? 1 : 0;
         }
 
-        $condition = $this->direction === '<' ? ($chosen < $this->min) : ($chosen > $this->min);
+        $condition = $this->direction === self::DIRECTION_ATLEAST ? ($chosen < $this->min) : ($chosen > $this->min);
         if (!$chosen || $condition) {
             $attributesList = implode(', ', $attributesListLabels);
             $message = strtr($this->message, [
