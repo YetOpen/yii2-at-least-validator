@@ -71,6 +71,8 @@ class AtLeastValidator extends Validator
      */
     public $skipOnError = false;
 
+    public $direction = '<';
+
     /**
      * @inheritdoc
      */
@@ -108,7 +110,8 @@ class AtLeastValidator extends Validator
             $chosen += !empty($value) ? 1 : 0;
         }
 
-        if (!$chosen || $chosen < $this->min) {
+        $condition = $this->direction === '<' ? ($chosen < $this->min) : ($chosen > $this->min);
+        if (!$chosen || $condition) {
             $attributesList = implode(', ', $attributesListLabels);
             $message = strtr($this->message, [
                 '{min}' => $this->min,
